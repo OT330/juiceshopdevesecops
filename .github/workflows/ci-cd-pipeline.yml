@@ -77,11 +77,19 @@ jobs:
       - name: Create Reports Directory
         run: mkdir -p reports
 
+      - name: Install Node.js Dependencies
+        run: |
+          cd juice-shop
+          npm install
+
       - name: Run Dependency-Check
         run: |
           dependency-check/dependency-check/bin/dependency-check.sh \
           --project "Juice Shop" \
           --scan . \
+          --exclude "**/test/files/arbitraryFileWrite.zip" \
+          --exclude "**/test/files/passwordProtected.zip" \
+          --exclude "**/test/files/videoExploit.zip" \
           --format "ALL" \
           --out reports
 
