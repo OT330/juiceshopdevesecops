@@ -71,16 +71,19 @@ jobs:
           unzip dependency-check.zip -d dependency-check
           chmod +x dependency-check/dependency-check/bin/dependency-check.sh
 
+      - name: Create Reports Directory
+        run: mkdir -p reports
+
       - name: Run Dependency-Check
         run: |
           dependency-check/dependency-check/bin/dependency-check.sh \
           --project "Juice Shop" \
           --scan . \
           --format "ALL" \
-          --out reports/dependency-check-report
+          --out reports
 
       - name: Upload Dependency-Check Report
         uses: actions/upload-artifact@v3
         with:
           name: Dependency-Check-Report
-          path: reports/dependency-check-report
+          path: reports
