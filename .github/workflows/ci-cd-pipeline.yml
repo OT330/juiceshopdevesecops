@@ -59,6 +59,7 @@ jobs:
 
   sca:
     name: Software Composition Analysis (SCA) with Dependency-Check
+    needs: build-and-deploy
     runs-on: ubuntu-latest
 
     env:
@@ -101,14 +102,14 @@ jobs:
 
   dast:
     name: Dynamic Application Security Testing (DAST) with OWASP ZAP
-    needs: build-and-deploy
+    needs: sca
     runs-on: ubuntu-latest
 
     steps:
       - name: Start OWASP ZAP
         run: |
-          docker pull owasp/zap2docker-stable
-          docker run -u zap -d --name zap -p 8080:8080 owasp/zap2docker-stable zap.sh -daemon -host 0.0.0.0 -port 8080
+          docker pull owasp/zap:latest
+          docker run -u zap -d --name zap -p 8080:8080 owasp/zap:latest zap.sh -daemon -host 0.0.0.0 -port 8080
 
       - name: Wait for ZAP to Start
         run: sleep 30
