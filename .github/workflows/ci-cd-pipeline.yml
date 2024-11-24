@@ -98,3 +98,31 @@ jobs:
         with:
           name: Dependency-Check-Report
           path: reports
+
+  dast:
+    name: Dynamic Application Security Testing (DAST) with OWASP ZAP
+    needs: build-and-deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Start OWASP ZAP
+        run: |
+          docker pull owasp/zap2docker-stable
+          docker run -u zap -d --name zap -p 8080:8080 owasp/zap2docker-stable zap.sh -daemon -host 0.0.0.0 -port 8080
+
+      - name: Wait for ZAP to Start
+        run: sleep 30
+
+      - name: Run OWASP ZAP Scan
+        run: |
+          docker exec zap zap-cli quick-scan --self-contained --start-options '-config api.key=<zap_api_key>' http://host.docker.internal:3000
+
+      - name: Generate OWASP ZAP Report
+        run: |
+          docker exec zap zap-cli report -o /zap/reports/zap-report.html -f html
+
+      - name: Upload OWASP ZAP Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: ZAP-Report
+          path: /zap/reports/zap-report.html
