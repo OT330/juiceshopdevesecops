@@ -80,10 +80,12 @@ jobs:
           --project "Juice Shop" \
           --scan . \
           --format "ALL" \
-          --out reports
+          --out reports \
+          --nvdApiKey dc4978ff-856d-41c4-9c7c-323bca2d8a55
 
       - name: Upload Dependency-Check Report
         uses: actions/upload-artifact@v3
         with:
           name: Dependency-Check-Report
           path: reports
+
