@@ -106,24 +106,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Start OWASP ZAP
-        run: |
-          docker pull owasp/zap2docker-stable:2.12.0
-          docker run -u zap -d --name zap -p 8080:8080 owasp/zap2docker-stable:2.12.0 zap.sh -daemon -host 0.0.0.0 -port 8080
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      - name: Wait for ZAP to Start
-        run: sleep 30
-
-      - name: Run OWASP ZAP Scan
-        run: |
-          docker exec zap zap-cli quick-scan --self-contained --start-options '-config api.key=<zap_api_key>' http://host.docker.internal:3000
-
-      - name: Generate OWASP ZAP Report
-        run: |
-          docker exec zap zap-cli report -o /zap/reports/zap-report.html -f html
+      - name: Start OWASP ZAP Scan
+        uses: zaproxy/action-full-scan@v0.5.0
+        with:
+          target: "http://localhost:3000"
+          rules_file_name: ".zap/rules.json"
+          docker_name: "owasp/zap2docker-weekly"
+          api_key: "<zap_api_key>"
 
       - name: Upload OWASP ZAP Report
         uses: actions/upload-artifact@v3
         with:
           name: ZAP-Report
-          path: /zap/reports/zap-report.html
+          path: results/
+
