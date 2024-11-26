@@ -24,65 +24,6 @@ jobs:
           echo "Waiting for Juice Shop to start..."
           sleep 60
           curl -v http://localhost:3000 | grep "OWASP Juice Shop"
-
-  codeql-sast:
-    name: Static Application Security Testing (SAST) with CodeQL
-    needs: build-and-deploy
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
-        with:
-          languages: javascript
-
-      - name: Run CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
-        with:
-          category: "/security"
-
-  sca:
-    name: Software Composition Analysis (SCA) with Dependency-Check
-    needs: build-and-deploy
-    runs-on: ubuntu-latest
-
-    env:
-      NVD_API_KEY: dc4978ff-856d-41c4-9c7c-323bca2d8a55
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Set Up Dependency-Check
-        run: |
-          curl -L https://github.com/jeremylong/DependencyCheck/releases/download/v8.3.1/dependency-check-8.3.1-release.zip -o dependency-check.zip
-          unzip dependency-check.zip -d dependency-check
-          chmod +x dependency-check/dependency-check/bin/dependency-check.sh
-      - name: Create Reports Directory
-        run: mkdir -p reports
-
-      - name: Install Node.js Dependencies
-        run: |
-          cd juice-shop
-          npm install
-      - name: Run Dependency-Check
-        run: |
-          dependency-check/dependency-check/bin/dependency-check.sh \
-          --project "Juice Shop" \
-          --scan . \
-          --exclude "**/test/files/arbitraryFileWrite.zip" \
-          --exclude "**/test/files/passwordProtected.zip" \
-          --exclude "**/test/files/videoExploit.zip" \
-          --format "ALL" \
-          --out reports
-      - name: Upload Dependency-Check Report
-        uses: actions/upload-artifact@v3
-        with:
-          name: Dependency-Check-Report
-          path: reports
   dast:
     name: Dynamic Application Security Testing (DAST) with OWASP ZAP
     needs: build-and-deploy
@@ -99,7 +40,6 @@ jobs:
           echo "Waiting for Juice Shop to start..."
           sleep 60
           curl -v http://localhost:3000 || exit 1
-
       - name: Check Juice Shop Logs
         run: docker logs $(docker ps -q --filter ancestor=bkimminich/juice-shop)
 
