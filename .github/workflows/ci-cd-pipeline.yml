@@ -26,7 +26,6 @@ jobs:
           sleep 60
           curl -v http://localhost:3000 | grep "OWASP Juice Shop"
 
-
   codeql-sast:
     name: Static Application Security Testing (SAST) with CodeQL
     needs: build-and-deploy
@@ -45,6 +44,15 @@ jobs:
         uses: github/codeql-action/analyze@v2
         with:
           category: "/security"
+
+      - name: Upload CodeQL Report to DefectDojo
+        run: |
+          curl -X POST "http://localhost:8080/api/v2/import-scan/" \
+          -H "Authorization: Token 3c7e450aaf86ed7599812213e59f8f3a26ef0916" \
+          -F scan_type="CodeQL" \
+          -F file=@results.sarif \
+          -F product_name="OWASP Juice Shop" \
+          -F engagement_name="CodeQL SAST"
 
   sca:
     name: Software Composition Analysis (SCA) with Dependency-Check
@@ -80,11 +88,14 @@ jobs:
           --exclude "**/test/files/videoExploit.zip" \
           --format "ALL" \
           --out reports
-      - name: Upload Dependency-Check Report
-        uses: actions/upload-artifact@v3
-        with:
-          name: Dependency-Check-Report
-          path: reports
+      - name: Upload Dependency-Check Report to DefectDojo
+        run: |
+          curl -X POST "http://localhost:8080/api/v2/import-scan/" \
+          -H "Authorization: Token 3c7e450aaf86ed7599812213e59f8f3a26ef0916" \
+          -F scan_type="Dependency Check" \
+          -F file=@reports/dependency-check-report.xml \
+          -F product_name="OWASP Juice Shop" \
+          -F engagement_name="SCA"
 
   dast:
     name: Dynamic Application Security Testing (DAST) with OWASP ZAP
@@ -113,11 +124,11 @@ jobs:
           target: 'http://localhost:3000'
           cmd_options: '-w report_md.md -r report_html.html -J report_json.json -a'
 
-      - name: Upload ZAP Reports
-        uses: actions/upload-artifact@v3
-        with:
-          name: ZAP-Reports
-          path: |
-            report_md.md
-            report_html.html
-            report_json.json
+      - name: Upload ZAP Report to DefectDojo
+        run: |
+          curl -X POST "http://localhost:8080/api/v2/import-scan/" \
+          -H "Authorization: Token 3c7e450aaf86ed7599812213e59f8f3a26ef0916" \
+          -F scan_type="ZAP Scan" \
+          -F file=@report_json.json \
+          -F product_name="OWASP Juice Shop" \
+          -F engagement_name="DAST"
