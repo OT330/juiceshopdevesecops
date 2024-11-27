@@ -24,6 +24,26 @@ jobs:
           echo "Waiting for Juice Shop to start..."
           sleep 60
           curl -v http://localhost:3000 | grep "OWASP Juice Shop"
+
+  codeql-sast:
+    name: Static Application Security Testing (SAST) with CodeQL
+    needs: build-and-deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript
+
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/security"
+
   dast:
     name: Dynamic Application Security Testing (DAST) with OWASP ZAP
     needs: build-and-deploy
