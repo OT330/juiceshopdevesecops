@@ -18,6 +18,15 @@ jobs:
         image: bkimminich/juice-shop
         ports:
           - 3000:3000
+      defectdojo:
+        image: defectdojo/defectdojo-django
+        ports:
+          - 8080:8080
+        options: >
+          --health-cmd="curl --fail http://localhost:8080/api/v2/" 
+          --health-interval=10s 
+          --health-timeout=5s 
+          --health-retries=3
 
     steps:
       - name: Wait for Juice Shop to Start
@@ -53,8 +62,6 @@ jobs:
           -F file=@/home/runner/work/juiceshopdevesecops/results/javascript.sarif \
           -F product_name="OWASP Juice Shop" \
           -F engagement_name="CodeQL SAST"
-  
-  
 
   sca:
     name: Software Composition Analysis (SCA) with Dependency-Check
