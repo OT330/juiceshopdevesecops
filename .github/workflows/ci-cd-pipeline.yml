@@ -50,9 +50,10 @@ jobs:
           curl -X POST "http://localhost:8080/api/v2/import-scan/" \
           -H "Authorization: Token 3c7e450aaf86ed7599812213e59f8f3a26ef0916" \
           -F scan_type="CodeQL" \
-          -F file=@results.sarif \
+          -F file=@../results/security.sarif \
           -F product_name="OWASP Juice Shop" \
           -F engagement_name="CodeQL SAST"
+  
 
   sca:
     name: Software Composition Analysis (SCA) with Dependency-Check
